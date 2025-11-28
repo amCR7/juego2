@@ -1,0 +1,58 @@
+<div id="loginDiv">
+    <h2>Ingresa tu nombre para jugar</h2>
+    <input type="text" id="username" placeholder="Tu nombre">
+    <button onclick="iniciarJuego()">Entrar</button>
+</div>
+
+<div id="game" style="display:none;"></div>
+
+<script>
+let currentIndex = 0;
+let parejas = [];
+let username = "";
+
+function iniciarJuego() {
+    username = document.getElementById("username").value.trim();
+    if(!username) return alert("Ingresa un nombre");
+    document.getElementById("loginDiv").style.display = "none";
+    document.getElementById("game").style.display = "block";
+    cargarParejas();
+}
+
+async function cargarParejas() {
+    const res = await fetch("/api/all-pairs");
+    parejas = await res.json();
+    mostrarPareja();
+}
+
+function mostrarPareja() {
+    if (currentIndex >= parejas.length) {
+        document.getElementById("game").innerHTML = "<h2>¡Fin del duelo!</h2>";
+        return;
+    }
+
+    const data = parejas[currentIndex];
+    const html = `
+    <div class="container">
+      <div class="card" onclick="votar(${data.persona1.id}, ${data.pareja_id})">
+        <img src="${data.persona1.foto || 'default.png'}" onerror="this.src='default.png'">
+        <h2>${data.persona1.nombre}</h2>
+      </div>
+      <div class="card" onclick="votar(${data.persona2.id}, ${data.pareja_id})">
+        <img src="${data.persona2.foto || 'default.png'}" onerror="this.src='default.png'">
+        <h2>${data.persona2.nombre}</h2>
+      </div>
+    </div>`;
+    document.getElementById("game").innerHTML = html;
+}
+
+async function votar(personaId, parejaId) {
+    await fetch("/api/choose", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ elegido_id: personaId, pareja_id: parejaId, usuario_nombre: username })
+    });
+    currentIndex++;
+    mostrarPareja();
+}
+</script>

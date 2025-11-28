@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Ranking</title>
+    <style>
+        body { font-family: Arial; padding: 20px; }
+        .persona { display: flex; align-items: center; margin-bottom: 12px; gap: 12px; }
+        img { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; }
+    </style>
+</head>
+<body>
+
+<h1>Ranking de Personas Más Elegidas</h1>
+<div id="ranking"></div>
+
+<script>
+async function cargarRanking() {
+    const res = await fetch("http://localhost:3000/api/ranking");
+    const personas = await res.json();
+    
+    const container = document.getElementById("ranking");
+    container.innerHTML = "";
+
+    personas.forEach(p => {
+        const foto = p.foto || "default.png";
+        container.innerHTML += `
+            <div class="persona">
+                <img src="${foto}">
+                <strong>${p.nombre}</strong> – ${p.votos} votos
+            </div>
+        `;
+    });
+}
+
+cargarRanking();
+</script>
+
+</body>
+</html>
