@@ -15,22 +15,30 @@
 <div id="ranking"></div>
 
 <script>
-async function cargarRanking() {
-    const res = await fetch("http://localhost:3000/api/ranking");
-    const personas = await res.json();
-    
-    const container = document.getElementById("ranking");
-    container.innerHTML = "";
+// Cambia esto por la IP pública de tu VM de Google Cloud
+const API_URL = "http://35.209.12.147:3000";
 
-    personas.forEach(p => {
-        const foto = p.foto || "default.png";
-        container.innerHTML += `
-            <div class="persona">
-                <img src="${foto}">
-                <strong>${p.nombre}</strong> – ${p.votos} votos
-            </div>
-        `;
-    });
+async function cargarRanking() {
+    try {
+        const res = await fetch(`${API_URL}/api/ranking`);
+        const personas = await res.json();
+
+        const container = document.getElementById("ranking");
+        container.innerHTML = "";
+
+        personas.forEach(p => {
+            const foto = p.foto || "default.png";
+            container.innerHTML += `
+                <div class="persona">
+                    <img src="${foto}">
+                    <strong>${p.nombre}</strong> – ${p.votos} votos
+                </div>
+            `;
+        });
+    } catch(err) {
+        console.error("Error cargando ranking:", err);
+        alert("No se pudo cargar el ranking. Revisa la conexión.");
+    }
 }
 
 cargarRanking();

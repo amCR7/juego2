@@ -6,10 +6,19 @@
 
 <div id="game" style="display:none;"></div>
 
+<style>
+.container { display: flex; justify-content: space-around; margin-top: 20px; }
+.card { cursor: pointer; text-align: center; width: 150px; }
+.card img { width: 100px; height: 100px; object-fit: cover; border-radius: 50%; }
+</style>
+
 <script>
 let currentIndex = 0;
 let parejas = [];
 let username = "";
+
+// Cambia esto por la IP pública de tu VM de Google Cloud o dominio
+const API_URL = "http://35.209.12.147:3000";
 
 function iniciarJuego() {
     username = document.getElementById("username").value.trim();
@@ -20,9 +29,14 @@ function iniciarJuego() {
 }
 
 async function cargarParejas() {
-    const res = await fetch("/api/all-pairs");
-    parejas = await res.json();
-    mostrarPareja();
+    try {
+        const res = await fetch(`${API_URL}/api/all-pairs`);
+        parejas = await res.json();
+        mostrarPareja();
+    } catch(err) {
+        console.error("Error cargando parejas:", err);
+        alert("No se pudieron cargar las parejas. Revisa la conexión.");
+    }
 }
 
 function mostrarPareja() {
@@ -47,12 +61,17 @@ function mostrarPareja() {
 }
 
 async function votar(personaId, parejaId) {
-    await fetch("/api/choose", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ elegido_id: personaId, pareja_id: parejaId, usuario_nombre: username })
-    });
-    currentIndex++;
-    mostrarPareja();
+    try {
+        await fetch(`${API_URL}/api/choose`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ elegido_id: personaId, pareja_id: parejaId, usuario_nombre: username })
+        });
+        currentIndex++;
+        mostrarPareja();
+    } catch(err) {
+        console.error("Error registrando voto:", err);
+        alert("No se pudo registrar el voto. Revisa la conexión.");
+    }
 }
 </script>
