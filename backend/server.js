@@ -5,7 +5,10 @@ import path from "path";
 import { fileURLToPath } from "url";
 
 const app = express();
-app.use(cors());
+app.use(cors({
+  origin: "https://juego2-3.onrender.com"
+}));
+
 app.use(express.json());
 
 // Archivos estáticos
@@ -15,7 +18,7 @@ app.use(express.static(path.join(__dirname, "../frontend")));
 
 // Obtener todas las parejas
 app.get("/api/all-pairs", async (req, res) => {
-    const rows = await db.all(`
+    const rows = await db.query(`
         SELECT p.id AS pareja_id,
                a.id AS persona1_id, a.nombre AS nombre1, a.foto AS foto1,
                b.id AS persona2_id, b.nombre AS nombre2, b.foto AS foto2
@@ -51,8 +54,8 @@ app.post("/api/choose", async (req, res) => {
 });
 
 // Ranking
-app.get("/api/ranking", async (req, res) => {
-    const rows = await db.all("SELECT id, nombre, foto, votos FROM personas ORDER BY votos DESC LIMIT 50");
+app.get("https://juego2-3.onrender.com/api/ranking", async (req, res) => {
+    const rows = await db.query("SELECT id, nombre, foto, votos FROM personas ORDER BY votos DESC LIMIT 50");
     res.json(rows);
 });
 
@@ -63,5 +66,5 @@ app.get("/", (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, "0.0.0.0", () => {
-    console.log(`Servidor backend corriendo en http://localhost:${PORT}`);
+    console.log("Servidor backend corriendo en 3000");
 });
