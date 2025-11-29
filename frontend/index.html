@@ -35,7 +35,7 @@ function iniciarJuego() {
 }
 
 async function cargarParejas() {
-    const res = await fetch("/api/all-pairs");
+const res = await fetch("https://juego2-3.onrender.com/api/all-pairs");
     parejas = await res.json();
     mostrarPareja();
 }
@@ -62,7 +62,7 @@ function mostrarPareja() {
 }
 
 async function votar(personaId, parejaId) {
-    await fetch("/api/choose", {
+    await fetch("https://juego2-3.onrender.com/api/choose", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ elegido_id: personaId, pareja_id: parejaId, usuario_nombre: username })

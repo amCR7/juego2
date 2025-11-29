@@ -20,7 +20,7 @@ const API_URL = "http://localhost:3000";
 
 async function cargarRanking() {
     try {
-        const res = await fetch(`${API_URL}/api/ranking`);
+        const res = await fetch("https://juego2-3.onrender.com/api/ranking");
         const personas = await res.json();
 
         const container = document.getElementById("ranking");
