@@ -15,7 +15,7 @@ app.use(express.static(path.join(__dirname, "../frontend")));
 
 // Endpoint: todas las parejas ordenadas
 app.get("/api/all-pairs", async (req, res) => {
-    const [rows] = await db.query(`
+    const rows = await db.all(`
         SELECT p.id AS pareja_id,
                a.id AS persona1_id, a.nombre AS nombre1, a.foto AS foto1,
                b.id AS persona2_id, b.nombre AS nombre2, b.foto AS foto2
@@ -38,45 +38,19 @@ app.get("/api/all-pairs", async (req, res) => {
 app.post("/api/choose", async (req, res) => {
     const { pareja_id, elegido_id, usuario_nombre } = req.body;
 
-    // 1️⃣ Registrar usuario si no existe
-    const [usuarioRows] = await db.query(
-        "SELECT id FROM usuarios WHERE nombre = ?",
-        [usuario_nombre]
-    );
+    let usuario = await db.get("SELECT id FROM usuarios WHERE nombre=?", usuario_nombre);
+    let usuario_id = usuario ? usuario.id : (await db.run("INSERT INTO usuarios (nombre) VALUES (?)", usuario_nombre)).lastID;
 
-    let usuario_id;
-    if (usuarioRows.length === 0) {
-        const [result] = await db.query(
-            "INSERT INTO usuarios (nombre) VALUES (?)",
-            [usuario_nombre]
-        );
-        usuario_id = result.insertId;
-    } else {
-        usuario_id = usuarioRows[0].id;
-    }
-
-    // 2️⃣ Registrar la votación
-    await db.query(
-        "INSERT INTO elecciones (pareja_id, elegido_id) VALUES (?, ?)",
-        [pareja_id, elegido_id]
-    );
-
-    // 3️⃣ Registrar en una tabla nueva votos por usuario
-    await db.query(`
-        INSERT INTO votos_usuario (usuario_id, pareja_id, elegido_id)
-        VALUES (?, ?, ?)
-    `, [usuario_id, pareja_id, elegido_id]);
-
-    // 4️⃣ Incrementar contador general
-    await db.query("UPDATE personas SET votos = votos + 1 WHERE id = ?", [elegido_id]);
+    await db.run("INSERT INTO elecciones (pareja_id, elegido_id) VALUES (?, ?)", pareja_id, elegido_id);
+    await db.run("INSERT INTO votos_usuario (usuario_id, pareja_id, elegido_id) VALUES (?, ?, ?)", usuario_id, pareja_id, elegido_id);
+    await db.run("UPDATE personas SET votos = votos + 1 WHERE id = ?", elegido_id);
 
     res.json({ ok: true });
 });
 
-
 // Ranking
 app.get("/api/ranking", async (req, res) => {
-    const [rows] = await db.query("SELECT id, nombre, foto, votos FROM personas ORDER BY votos DESC LIMIT 50");
+    const rows = await db.all("SELECT id, nombre, foto, votos FROM personas ORDER BY votos DESC LIMIT 50");
     res.json(rows);
 });
 
@@ -85,6 +59,6 @@ app.get("/", (req, res) => {
     res.sendFile(path.join(__dirname, "../frontend/index.html"));
 });
 
-app.listen(3000, "0.0.0.0", () => {
-    console.log("Servidor backend corriendo en 3000");
+app.listen(process.env.PORT || 3000, "0.0.0.0", () => {
+    console.log("Servidor corriendo");
 });

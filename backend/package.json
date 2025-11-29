@@ -2,17 +2,17 @@
   "name": "duelo-parejas",
   "version": "1.0.0",
   "type": "module",
-  "main": "server.js",
   "scripts": {
-    "start": "node server.js",
-    "initdb": "node initDB.js",
-    "importar": "node importarParejas.js",
-    "fotos": "node fotos.js"
+    "start": "node backend/server.js",
+    "importar": "node backend/importarParejas.js",
+    "fotos": "node backend/fotos.js"
   },
   "dependencies": {
-    "cors": "^2.8.5",
     "express": "^4.18.2",
-    "mysql2": "^3.5.0",
-    "node-fetch": "^3.3.2"
+    "cors": "^2.8.5",
+    "sqlite": "^4.1.2",
+    "sqlite3": "^5.1.6",
+    "node-fetch": "^3.3.1",
+    "xlsx": "^0.18.5"
   }
 }
