@@ -1,8 +1,13 @@
 import sqlite3 from "sqlite3";
 import { open } from "sqlite";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const db = await open({
-  filename: './database.sqlite',
+  filename: path.join(__dirname, "database.sqlite"),
   driver: sqlite3.Database
 });
 
@@ -21,15 +26,15 @@ CREATE TABLE IF NOT EXISTS parejas (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     persona1_id INTEGER NOT NULL,
     persona2_id INTEGER NOT NULL,
-    FOREIGN KEY(persona1_id) REFERENCES personas(id),
-    FOREIGN KEY(persona2_id) REFERENCES personas(id)
+    FOREIGN KEY (persona1_id) REFERENCES personas(id),
+    FOREIGN KEY (persona2_id) REFERENCES personas(id)
 );
 `);
 
 await db.exec(`
 CREATE TABLE IF NOT EXISTS usuarios (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    nombre TEXT NOT NULL UNIQUE
+    nombre TEXT UNIQUE
 );
 `);
 
@@ -39,8 +44,8 @@ CREATE TABLE IF NOT EXISTS elecciones (
     pareja_id INTEGER NOT NULL,
     elegido_id INTEGER NOT NULL,
     fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY(pareja_id) REFERENCES parejas(id),
-    FOREIGN KEY(elegido_id) REFERENCES personas(id)
+    FOREIGN KEY (pareja_id) REFERENCES parejas(id),
+    FOREIGN KEY (elegido_id) REFERENCES personas(id)
 );
 `);
 
@@ -51,9 +56,9 @@ CREATE TABLE IF NOT EXISTS votos_usuario (
     pareja_id INTEGER NOT NULL,
     elegido_id INTEGER NOT NULL,
     fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY(usuario_id) REFERENCES usuarios(id),
-    FOREIGN KEY(pareja_id) REFERENCES parejas(id),
-    FOREIGN KEY(elegido_id) REFERENCES personas(id)
+    FOREIGN KEY (usuario_id) REFERENCES usuarios(id),
+    FOREIGN KEY (pareja_id) REFERENCES parejas(id),
+    FOREIGN KEY (elegido_id) REFERENCES personas(id)
 );
 `);
 

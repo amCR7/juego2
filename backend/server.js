@@ -13,7 +13,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 app.use(express.static(path.join(__dirname, "../frontend")));
 
-// Endpoint: todas las parejas ordenadas
+// Obtener todas las parejas
 app.get("/api/all-pairs", async (req, res) => {
     const rows = await db.all(`
         SELECT p.id AS pareja_id,
@@ -38,12 +38,14 @@ app.get("/api/all-pairs", async (req, res) => {
 app.post("/api/choose", async (req, res) => {
     const { pareja_id, elegido_id, usuario_nombre } = req.body;
 
-    let usuario = await db.get("SELECT id FROM usuarios WHERE nombre=?", usuario_nombre);
-    let usuario_id = usuario ? usuario.id : (await db.run("INSERT INTO usuarios (nombre) VALUES (?)", usuario_nombre)).lastID;
+    // Registrar usuario si no existe
+    let usuario = await db.get("SELECT id FROM usuarios WHERE nombre=?", [usuario_nombre]);
+    let usuario_id = usuario ? usuario.id : (await db.run("INSERT INTO usuarios (nombre) VALUES (?)", [usuario_nombre])).lastID;
 
-    await db.run("INSERT INTO elecciones (pareja_id, elegido_id) VALUES (?, ?)", pareja_id, elegido_id);
-    await db.run("INSERT INTO votos_usuario (usuario_id, pareja_id, elegido_id) VALUES (?, ?, ?)", usuario_id, pareja_id, elegido_id);
-    await db.run("UPDATE personas SET votos = votos + 1 WHERE id = ?", elegido_id);
+    // Registrar votación
+    await db.run("INSERT INTO elecciones (pareja_id, elegido_id) VALUES (?, ?)", [pareja_id, elegido_id]);
+    await db.run("INSERT INTO votos_usuario (usuario_id, pareja_id, elegido_id) VALUES (?, ?, ?)", [usuario_id, pareja_id, elegido_id]);
+    await db.run("UPDATE personas SET votos = votos + 1 WHERE id=?", [elegido_id]);
 
     res.json({ ok: true });
 });
@@ -54,11 +56,12 @@ app.get("/api/ranking", async (req, res) => {
     res.json(rows);
 });
 
-// Servir index.html por defecto
+// Servir index.html
 app.get("/", (req, res) => {
     res.sendFile(path.join(__dirname, "../frontend/index.html"));
 });
 
-app.listen(process.env.PORT || 3000, "0.0.0.0", () => {
-    console.log("Servidor corriendo");
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, "0.0.0.0", () => {
+    console.log(`Servidor backend corriendo en http://localhost:${PORT}`);
 });
