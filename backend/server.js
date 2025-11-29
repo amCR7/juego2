@@ -86,5 +86,5 @@ app.get("/", (req, res) => {
 });
 
 app.listen(3000, "0.0.0.0", () => {
-    console.log("Servidor backend corriendo en http://localhost:3000");
+    console.log("Servidor backend corriendo en 3000");
 });
